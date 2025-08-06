@@ -5,7 +5,7 @@ services:
     env: python
     plan: starter
     buildCommand: pip install -r requirements.txt
-    startCommand: python render_start.py && gunicorn --bind 0.0.0.0:10000 --workers 2 --timeout 120 app:app
+    startCommand: python fix_database_url.py && python render_start.py && gunicorn --bind 0.0.0.0:10000 --workers 1 --timeout 120 app:app
     healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
@@ -16,10 +16,6 @@ services:
         value: "1"
       - key: PORT
         value: "10000"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: railway-file-management-db
-          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: ADMIN_USER_1

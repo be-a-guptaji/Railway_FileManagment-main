@@ -4,36 +4,40 @@ This guide helps you troubleshoot common issues when deploying the Railway File 
 
 ## Common Issues and Solutions
 
-### 1. PORT Environment Variable Error
+### 1. DATABASE_URL Parsing Error
 
 **Error**: `ValueError: invalid literal for int() with base 10: 'port'`
 
-**Cause**: Render sometimes sets PORT to an invalid value or the environment variable is not properly configured.
+**Cause**: This error is actually from DATABASE_URL parsing, not PORT. The DATABASE_URL contains the literal string "port" instead of a numeric port number.
 
 **Solutions**:
 
-#### Option A: Use render-simple.yaml
+#### Option A: Use render-fixed.yaml
 
-Replace your `render.yaml` with `render-simple.yaml` which explicitly sets PORT:
+Replace your `render.yaml` with `render-fixed.yaml` which includes DATABASE_URL validation:
 
 ```bash
 mv render.yaml render-original.yaml
-mv render-simple.yaml render.yaml
+mv render-fixed.yaml render.yaml
+git add .
+git commit -m "Use fixed Render configuration"
+git push origin main
 ```
 
-#### Option B: Fix PORT in render.yaml
+#### Option B: Manual DATABASE_URL Setup
 
-Add explicit PORT environment variable:
+1. Create services manually (database first, then web service)
+2. Get database connection details from Render dashboard
+3. Manually construct and set DATABASE_URL
+4. See `RENDER_DATABASE_SETUP.md` for detailed instructions
 
-```yaml
-envVars:
-  - key: PORT
-    value: "10000"
-```
+#### Option C: Use External Database
 
-#### Option C: Use the shell script approach
+Use Neon, Supabase, or ElephantSQL instead of Render's PostgreSQL:
 
-The `start_render.sh` script handles PORT validation automatically.
+- Sign up for external database service
+- Get connection string
+- Set as DATABASE_URL in Render environment variables
 
 ### 2. Database Connection Issues
 

@@ -19,13 +19,28 @@ def setup_render_environment():
     # Set production environment
     os.environ.setdefault("FLASK_ENV", "production")
 
-    # Validate required environment variables
-    required_vars = ["DATABASE_URL"]
-    missing_vars = [var for var in required_vars if not os.environ.get(var)]
+    # Validate and fix DATABASE_URL
+    print("Validating DATABASE_URL...")
+    try:
+        from fix_database_url import validate_and_fix_database_url
 
-    if missing_vars:
-        print(f"WARNING: Missing environment variables: {', '.join(missing_vars)}")
-        print("The application may not work correctly without these variables")
+        if not validate_and_fix_database_url():
+            print("ERROR: DATABASE_URL validation failed")
+            return False
+    except ImportError:
+        print("DATABASE_URL validation script not found, using basic validation")
+        # Basic validation
+        database_url = os.environ.get("DATABASE_URL", "")
+        if not database_url:
+            print("ERROR: DATABASE_URL environment variable is not set")
+            return False
+        elif "port" in database_url and not any(
+            char.isdigit() for char in database_url.split("port")[1][:10]
+        ):
+            print(
+                "ERROR: DATABASE_URL appears malformed - contains 'port' without numeric value"
+            )
+            return False
 
     # Print configuration info (without sensitive data)
     print("Render Configuration:")
@@ -43,6 +58,8 @@ def setup_render_environment():
         print(f"- PORT: Invalid value '{port_value}', will use default")
         # Set a valid default port for Render
         os.environ["PORT"] = "10000"
+
+    return True
 
 
 def wait_for_database():
@@ -133,7 +150,10 @@ def main():
     print("=" * 60)
 
     # Setup Render environment
-    setup_render_environment()
+    env_ready = setup_render_environment()
+    if not env_ready:
+        print("❌ Environment setup failed")
+        return False
 
     # Setup upload directory
     setup_upload_directory()
@@ -149,6 +169,7 @@ def main():
 
     print("🚀 Application ready for Render deployment")
     print("=" * 60)
+    return True
 
 
 if __name__ == "__main__":

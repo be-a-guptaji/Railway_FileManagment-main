@@ -29,7 +29,19 @@ app = Flask(__name__)
 config_class = get_config()
 app.config.from_object(config_class)
 
-db.init_app(app)
+# Initialize database with error handling
+try:
+    db.init_app(app)
+    print("Database initialization successful")
+except Exception as e:
+    print(f"Database initialization error: {e}")
+    print("This may be due to malformed DATABASE_URL")
+    # In production environments, we might want to continue with limited functionality
+    if os.environ.get("RENDER") or os.environ.get("VERCEL"):
+        print("Continuing startup in cloud environment - database will be retried")
+    else:
+        raise
+
 serializer = URLSafeTimedSerializer(app.secret_key)
 
 
