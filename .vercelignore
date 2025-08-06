@@ -1,0 +1,79 @@
+# Vercel ignore file - exclude unnecessary files from deployment
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# Railway-specific files
+railway.json
+railway_start.py
+Procfile
+Dockerfile
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Upload folders (not needed in serverless)
+uploads/
+
+# Documentation (optional - remove if you want docs deployed)
+*.md
+!README.md
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Git
+.git/
+.gitignore
+
+# Other deployment configs
+docker-compose.yml
+heroku.yml

@@ -69,16 +69,92 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
+class VercelConfig(Config):
+    """Vercel serverless configuration"""
+
+    DEBUG = False
+    FLASK_ENV = "production"
+
+    # Vercel-specific optimizations
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "connect_args": {
+            "connect_timeout": 10,
+            "application_name": "railway_file_management",
+        },
+    }
+
+    # Use stronger secret key in production
+    if os.environ.get("SECRET_KEY"):
+        SECRET_KEY = os.environ.get("SECRET_KEY")
+    else:
+        # For Vercel deployment, use a default secure key if not provided
+        import secrets
+
+        SECRET_KEY = secrets.token_urlsafe(32)
+        print(
+            "WARNING: Using generated SECRET_KEY. Set SECRET_KEY environment variable for production."
+        )
+
+    # Vercel has limited file system access
+    UPLOAD_FOLDER = "/tmp/uploads"
+
+
+class RenderConfig(Config):
+    """Render.com configuration"""
+
+    DEBUG = False
+    FLASK_ENV = "production"
+
+    # Render-specific optimizations
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 3600,  # Longer recycle time for persistent containers
+        "pool_size": 5,
+        "max_overflow": 10,
+        "connect_args": {
+            "connect_timeout": 30,
+            "application_name": "railway_file_management_render",
+        },
+    }
+
+    # Use stronger secret key in production
+    if os.environ.get("SECRET_KEY"):
+        SECRET_KEY = os.environ.get("SECRET_KEY")
+    else:
+        # For Render deployment, use a default secure key if not provided
+        import secrets
+
+        SECRET_KEY = secrets.token_urlsafe(32)
+        print(
+            "WARNING: Using generated SECRET_KEY. Set SECRET_KEY environment variable for production."
+        )
+
+    # Render has persistent disk storage
+    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "uploads")
+
+
 # Configuration dictionary
 config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
     "testing": TestingConfig,
+    "vercel": VercelConfig,
+    "render": RenderConfig,
     "default": DevelopmentConfig,
 }
 
 
 def get_config():
     """Get configuration based on environment"""
+    # Detect Vercel environment
+    if os.environ.get("VERCEL"):
+        return config["vercel"]
+
+    # Detect Render environment
+    if os.environ.get("RENDER"):
+        return config["render"]
+
     env = os.environ.get("FLASK_ENV", "development")
     return config.get(env, config["default"])

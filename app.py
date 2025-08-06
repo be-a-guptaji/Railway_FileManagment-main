@@ -48,8 +48,9 @@ def ensure_upload_folder():
         return False
 
 
-# Initialize upload folder
-ensure_upload_folder()
+# Initialize upload folder (skip in Vercel serverless environment)
+if not os.environ.get("VERCEL"):
+    ensure_upload_folder()
 
 
 # ------------------- Middleware -------------------
@@ -149,6 +150,11 @@ def health_check():
                 {
                     "status": "healthy",
                     "database": "connected",
+                    "platform": (
+                        "vercel"
+                        if os.environ.get("VERCEL")
+                        else "render" if os.environ.get("RENDER") else "other"
+                    ),
                     "timestamp": datetime.utcnow().isoformat(),
                 }
             ),
@@ -161,6 +167,11 @@ def health_check():
                     "status": "unhealthy",
                     "database": "disconnected",
                     "error": str(e),
+                    "platform": (
+                        "vercel"
+                        if os.environ.get("VERCEL")
+                        else "render" if os.environ.get("RENDER") else "other"
+                    ),
                     "timestamp": datetime.utcnow().isoformat(),
                 }
             ),
@@ -265,12 +276,18 @@ def export_excel():
             ]
         )
 
-        # Ensure upload folder exists
-        if not ensure_upload_folder():
-            flash("Error: Upload folder not accessible.", "danger")
-            return redirect(url_for("home"))
+        # For Vercel, use /tmp directory
+        if os.environ.get("VERCEL"):
+            upload_path = "/tmp"
+            os.makedirs(upload_path, exist_ok=True)
+        else:
+            # Ensure upload folder exists
+            if not ensure_upload_folder():
+                flash("Error: Upload folder not accessible.", "danger")
+                return redirect(url_for("home"))
+            upload_path = app.config["UPLOAD_FOLDER"]
 
-        path = os.path.join(app.config["UPLOAD_FOLDER"], "exported_files.xlsx")
+        path = os.path.join(upload_path, "exported_files.xlsx")
         df.to_excel(path, index=False)
         return send_file(path, as_attachment=True)
     except Exception as e:
@@ -288,14 +305,18 @@ def import_excel():
         return redirect(url_for("home"))
 
     try:
-        # Ensure upload folder exists
-        if not ensure_upload_folder():
-            flash("Error: Upload folder not accessible.", "danger")
-            return redirect(url_for("home"))
+        # For Vercel, use /tmp directory
+        if os.environ.get("VERCEL"):
+            upload_path = "/tmp"
+            os.makedirs(upload_path, exist_ok=True)
+        else:
+            # Ensure upload folder exists
+            if not ensure_upload_folder():
+                flash("Error: Upload folder not accessible.", "danger")
+                return redirect(url_for("home"))
+            upload_path = app.config["UPLOAD_FOLDER"]
 
-        filepath = os.path.join(
-            app.config["UPLOAD_FOLDER"], secure_filename(file.filename)
-        )
+        filepath = os.path.join(upload_path, secure_filename(file.filename))
         file.save(filepath)
     except Exception as e:
         print(f"File save error: {e}")
@@ -457,6 +478,9 @@ def create_tables():
         except Exception as e:
             print(f"Error creating database tables: {e}")
             print("Make sure DATABASE_URL is correctly configured")
+            # In Vercel, don't fail completely if database isn't ready
+            if os.environ.get("VERCEL"):
+                print("Running in Vercel environment - database may not be ready yet")
             return False
 
 
