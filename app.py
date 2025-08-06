@@ -487,7 +487,12 @@ def create_tables():
 if __name__ == "__main__":
     create_tables()
     # Get port from environment variable for cloud deployment
-    port = int(os.environ.get("PORT", 5000))
+    try:
+        port = int(os.environ.get("PORT", 5000))
+    except (ValueError, TypeError):
+        print(f"Invalid PORT value: {os.environ.get('PORT')}, using default 5000")
+        port = 5000
+
     debug = os.environ.get("FLASK_ENV") == "development"
     app.run(host="0.0.0.0", port=port, debug=debug)
 else:

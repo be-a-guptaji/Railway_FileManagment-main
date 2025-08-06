@@ -33,7 +33,16 @@ def setup_render_environment():
     print(f"- DATABASE_URL: {'set' if os.environ.get('DATABASE_URL') else 'not set'}")
     print(f"- SECRET_KEY: {'set' if os.environ.get('SECRET_KEY') else 'not set'}")
     print(f"- RENDER: {os.environ.get('RENDER', 'not set')}")
-    print(f"- PORT: {os.environ.get('PORT', 'not set')}")
+
+    # Validate and fix PORT environment variable
+    port_value = os.environ.get("PORT", "10000")
+    try:
+        port_int = int(port_value)
+        print(f"- PORT: {port_int}")
+    except (ValueError, TypeError):
+        print(f"- PORT: Invalid value '{port_value}', will use default")
+        # Set a valid default port for Render
+        os.environ["PORT"] = "10000"
 
 
 def wait_for_database():
