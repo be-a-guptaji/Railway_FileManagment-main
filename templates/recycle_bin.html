@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Recycle Bin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #735DA5, #D3C5E5);
+      background-size: 200% 200%;
+      animation: bg-animate 8s ease infinite;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    @keyframes bg-animate {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .recycle-box {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 800px;
+      animation: fade-in-up 0.6s ease-out both;
+    }
+
+    h2 {
+      color: #735DA5;
+      font-weight: bold;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .file-item {
+      background: #f9f5ff;
+      border: 1px solid #ddd2ee;
+      padding: 12px 18px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .timestamp {
+      font-size: 0.8em;
+      color: #888;
+    }
+
+    .btn-small {
+      font-size: 0.8em;
+      padding: 4px 8px;
+      margin-right: 8px;
+    }
+
+    .btn-outline-primary {
+      color: #735DA5;
+      border-color: #735DA5;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #735DA5;
+      color: white;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+  <script>
+    async function loadRecycleBin() {
+      try {
+        const res = await fetch('/recycle_bin');  // FIXED: Changed from '/api/recycle_bin' to '/recycle_bin'
+        const files = await res.json();
+        const list = document.getElementById('recycle-list');
+        list.innerHTML = '';
+
+        if (files.length === 0) {
+          list.innerHTML = '<p class="text-muted">🗑️ No deleted files found.</p>';
+        } else {
+          files.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+              <strong>${file.filename}</strong> (${file.file_code})<br>
+              <small class="timestamp">🕓 Deleted at: ${file.deleted_at}</small><br>
+              <button class="btn btn-sm btn-outline-success btn-small" onclick="restoreFile('${file.file_code}')">🔁 Restore</button>
+              <button class="btn btn-sm btn-outline-danger btn-small" onclick="permanentlyDelete('${file.file_code}')">❌ Delete</button>
+            `;
+            list.appendChild(item);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading recycle bin:', error);
+        document.getElementById('recycle-list').innerHTML = '<p class="text-danger">❌ Error loading recycle bin</p>';
+      }
+    }
+
+    async function restoreFile(fileCode) {
+      if (!confirm('Restore this file?')) return;
+
+      try {
+        const res = await fetch('/restore_file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file_code: fileCode })
+        });
+
+        const data = await res.json();
+        alert(data.message || data.error);
+        loadRecycleBin();
+      } catch (error) {
+        console.error('Error restoring file:', error);
+        alert('Error restoring file');
+      }
+    }
+
+    async function permanentlyDelete(fileCode = null) {
+      const confirmMsg = fileCode
+        ? 'Permanently delete this file?'
+        : 'Permanently delete ALL files in Recycle Bin?';
+
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        const res = await fetch('/empty_recycle_bin', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file_code: fileCode }) // file_code = null for full cleanup
+        });
+
+        const data = await res.json();
+        alert(data.message || data.error);
+        loadRecycleBin();
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        alert('Error deleting file');
+      }
+    }
+
+    window.onload = loadRecycleBin;
+  </script>
+</head>
+<body>
+  <div class="recycle-box">
+    <h2>🗑️ Recycle Bin</h2>
+    <div id="recycle-list"></div>
+    <button onclick="permanentlyDelete()" class="btn btn-outline-danger mt-3 w-100">❌ Empty Recycle Bin</button>
+    <a href="/" class="btn btn-outline-primary mt-3 w-100">⬅️ Back to Home</a>
+  </div>
+</body>
+</html>

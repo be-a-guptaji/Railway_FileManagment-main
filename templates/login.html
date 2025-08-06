@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      background: url("{{ url_for('static', filename='main.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    main {
+      flex: 1 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      padding: 40px 20px;
+    }
+
+    #container {
+      background: rgba(255, 255, 255, 0.95);
+      width: 500px;
+      max-width: 95%;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+      padding: 50px;
+    }
+
+    .app-title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #0D47A1;
+      margin-bottom: 30px;
+    }
+
+    form input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+    }
+
+    form input:focus {
+      border-color: #0D47A1;
+      box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.2);
+      outline: none;
+    }
+
+    form button {
+      width: 100%;
+      background: #0D47A1;
+      border: none;
+      color: white;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    form button:hover {
+      background: #0a3578;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 14px;
+      color: #0D47A1;
+      text-decoration: none;
+      margin-top: -10px;
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      font-size: 14px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    footer {
+      flex-shrink: 0;
+      background-color: #0D47A1;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="container">
+      <!-- Title -->
+      <div class="app-title">Account Office File Compactor Login</div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Login Form -->
+      <form method="POST" action="{{ url_for('login') }}">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <a href="#" class="forgot-link" data-bs-toggle="modal" data-bs-target="#forgotModal">Forgot password?</a>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal fade" id="forgotModal" tabindex="-1" aria-labelledby="forgotModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header" style="background-color:#0D47A1; color:white; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+          <h5 class="modal-title" id="forgotModalLabel">Reset Password</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{{ url_for('forgot_password') }}">
+          <div class="modal-body p-4">
+            <label class="form-label">Enter your username:</label>
+            <input type="text" class="form-control" name="username" required placeholder="Username">
+          </div>
+          <div class="modal-footer px-4 pb-4">
+            <button type="submit" class="btn btn-primary w-100" style="background:#0D47A1; border:none;">Send Reset Link</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Designed &amp; Developed by IT-Cell/Accounts AGRA-NCR RAILWAYS.<br>
+    IT-Cell /Accounts AGRA Reserves copyright from 2025 onwards.
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

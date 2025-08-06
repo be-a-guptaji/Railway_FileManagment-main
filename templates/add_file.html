@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Add File</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&family=Open+Sans&family=Poppins&display=swap"
+    rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    :root {
+      --primary: #0D47A1;
+      --secondary: #E3F2FD;
+      --accent: #FFC107;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Open Sans', 'Poppins', sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .splash-logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      z-index: 9999;
+      transition: all 1.5s ease-in-out;
+      width: 500px;
+    }
+
+    .splash-logo.done {
+      top: 0;
+      left: 0;
+      transform: translate(0, 0) scale(1);
+      width: 165px;
+    }
+
+    main {
+      flex: 1 0 auto;
+      padding: 60px 15px 40px;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .form-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 60px 50px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1050px;
+      animation: fade-slide 0.7s ease-out both;
+      margin: 0 auto;
+    }
+
+    @keyframes fade-slide {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2, h4 {
+      color: var(--primary);
+      font-family: 'Noto Serif', serif;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.2);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #08306b;
+    }
+
+    .btn-secondary {
+      background-color: var(--accent);
+      color: black;
+      border: none;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e6b800;
+    }
+
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-outline-primary:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-outline-danger {
+      border-color: #dc3545;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .file-table th,
+    .file-table td {
+      vertical-align: middle;
+    }
+
+    .table-wrap {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    hr {
+      border-top: 1px solid #eee;
+    }
+
+    footer {
+      flex-shrink: 0;
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .form-box {
+        padding: 30px 20px;
+      }
+
+      .logout-btn {
+        position: static;
+        margin-bottom: 10px;
+        display: block;
+        text-align: right;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <video autoplay muted loop class="video-bg">
+    <source src="{{ url_for('static', filename='train.mp4') }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <img src="{{ url_for('static', filename='logo.png') }}" id="logo" class="splash-logo" alt="Logo" />
+
+  <main>
+    <div class="form-box">
+      <a href="/logout" class="btn btn-outline-danger logout-btn">🚪 Logout</a>
+      <h2>➕ Add New File</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/add">
+        <div class="row g-3">
+          <div class="col-md-6"><input name="filename" class="form-control" placeholder="File Name" required /></div>
+          <div class="col-md-6"><input name="file_code" class="form-control" placeholder="Unique File Code" required /></div>
+          <div class="col-md-12"><input name="tags" class="form-control" placeholder="Tags (optional)" /></div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Cabinet (Capacitor)</label>
+            <select name="cabinet" class="form-select" required>
+              <option value="">Select</option>
+              {% for i in range(1, 13) %}
+              <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Box</label>
+            <select name="box" class="form-select" required>
+              <option value="">Select</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Shelf</label>
+            <select name="shelf" class="form-select" required>
+              <option value="">Select</option>
+              {% for i in range(1, 6) %}
+              <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-primary mt-4 w-100">Add File</button>
+      </form>
+
+      <hr class="my-4" />
+      <form method="POST" action="/import" enctype="multipart/form-data">
+        <label class="form-label fw-bold">📥 Import from Excel:</label>
+        <input type="file" name="excel_file" accept=".xlsx" class="form-control mb-3" required />
+        <button class="btn btn-secondary w-100">Upload Excel</button>
+      </form>
+
+      <hr class="my-4" />
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="/export" class="btn btn-success flex-fill">📤 Export All Files (Excel)</a>
+        <a href="/search" class="btn btn-outline-primary flex-fill">🔍 Go to Search</a>
+      </div>
+
+      <hr class="my-4" />
+      <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-outline-dark" onclick="toggleRecycleBin()">🗑️ Recycle Bin</button>
+        <button id="emptyBinBtn" class="btn btn-outline-danger btn-sm d-none" onclick="emptyRecycleBin()">Empty</button>
+      </div>
+
+      <div id="recycleSection" class="table-responsive table-wrap mt-3 d-none">
+        <table class="table table-bordered table-sm file-table">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Code</th>
+              <th>Deleted At</th>
+              <th>Restore</th>
+            </tr>
+          </thead>
+          <tbody id="recycleList">
+            <tr>
+              <td colspan="4" class="text-center text-muted">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Designed &amp; Developed by IT-Cell/Accounts AGRA-NCR RAILWAYS.<br>
+    IT-Cell /Accounts AGRA Reserves copyright from 2025 onwards.
+  </footer>
+
+  <script>
+    function formatDateTime(isoString) {
+      const d = new Date(isoString);
+      return d.toLocaleString();
+    }
+
+    function loadRecycleBin() {
+      $('#recycleList').html(`<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>`);
+
+      $.get('/recycle_bin', function (files) {
+        if (!files || files.length === 0) {
+          $('#recycleList').html(`<tr><td colspan="4" class="text-center text-muted">Recycle Bin is empty.</td></tr>`);
+          return;
+        }
+        let rows = files.map(f => `
+          <tr>
+            <td>${f.filename}</td>
+            <td>${f.file_code}</td>
+            <td>${formatDateTime(f.deleted_at)}</td>
+            <td><button class="btn btn-sm btn-outline-success" onclick="restoreFile('${f.file_code}')">♻️</button></td>
+          </tr>
+        `);
+        $('#recycleList').html(rows.join(''));
+      }).fail(function (xhr, status, error) {
+        console.error("Recycle bin load failed:", error);
+        $('#recycleList').html(`<tr><td colspan="4" class="text-danger text-center">Failed to load Recycle Bin.</td></tr>`);
+      });
+    }
+
+    function restoreFile(code) {
+      $.ajax({
+        url: '/restore_file',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ file_code: code }),
+        success: function (res) {
+          alert(res.message || "Restored.");
+          loadRecycleBin();
+        },
+        error: function (xhr, status, error) {
+          console.error("Restore failed:", error);
+          alert("Restore failed");
+        }
+      });
+    }
+
+    function emptyRecycleBin() {
+      if (!confirm("Permanently delete all items in the Recycle Bin?")) return;
+
+      $.ajax({
+        url: '/empty_recycle_bin',
+        method: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify({}),
+        success: function (res) {
+          alert(res.message || "Recycle bin emptied.");
+          loadRecycleBin();
+        },
+        error: function (xhr, status, error) {
+          console.error("Error emptying Recycle Bin:", error);
+          alert("Error emptying Recycle Bin");
+        }
+      });
+    }
+
+    function toggleRecycleBin() {
+      const section = document.getElementById('recycleSection');
+      const emptyBtn = document.getElementById('emptyBinBtn');
+      const isVisible = !section.classList.contains('d-none');
+
+      section.classList.toggle('d-none', isVisible);
+      emptyBtn.classList.toggle('d-none', isVisible);
+
+      if (!isVisible) {
+        loadRecycleBin();
+      }
+    }
+
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById('logo').classList.add('done');
+      }, 1000);
+    };
+  </script>
+</body>
+
+</html>
