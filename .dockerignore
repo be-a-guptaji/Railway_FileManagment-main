@@ -1,7 +1,4 @@
 # Python
-venv/
-env/
-ENV/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,14 +19,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.mypy_cache/
-.pytest_cache/
-.coverage
 
-# Environment files
-.env
-.env.local
-.env.*.local
+# Virtual environments
+venv/
+env/
+ENV/
 
 # IDE
 .vscode/
@@ -41,20 +35,33 @@ wheels/
 .DS_Store
 Thumbs.db
 
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Cache
+.mypy_cache/
+.pytest_cache/
+.coverage
+
 # Logs
 *.log
-
-# Cloud platforms
-.vercel/
-.railway/
 
 # Temporary files
 *.tmp
 *.temp
 
-# Database
-*.db
-*.sqlite3
+# Documentation
+README.md
+docs/
 
-# Uploads (optional - uncomment if you don't want to track uploads)
-# uploads/
+# Vercel
+.vercel/
+
+# Railway
+.railway/
