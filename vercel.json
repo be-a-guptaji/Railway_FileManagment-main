@@ -1,5 +1,4 @@
 {
-    "version": 1,
     "builds": [
         {
         "src": "app.py",
