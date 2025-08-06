@@ -5,7 +5,7 @@ services:
     env: python
     plan: starter
     buildCommand: pip install -r requirements.txt
-    startCommand: python -c "import os; os.environ.setdefault('PORT', '10000'); exec(open('render_start.py').read())" && gunicorn --bind 0.0.0.0:10000 --workers 2 --timeout 120 --preload app:app
+    startCommand: chmod +x start_render.sh && ./start_render.sh
     healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
@@ -14,8 +14,6 @@ services:
         value: 3.11.9
       - key: RENDER
         value: "1"
-      - key: PORT
-        value: "10000"
       - key: DATABASE_URL
         fromDatabase:
           name: railway-file-management-db
@@ -43,3 +41,8 @@ services:
     databaseName: railway_file_management
     databaseUser: railway_user
     ipAllowList: []
+# Optional: Redis for caching (can be added later)
+# - type: redis
+#   name: railway-file-management-redis
+#   plan: starter
+#   ipAllowList: []
